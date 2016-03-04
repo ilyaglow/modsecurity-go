@@ -1,10 +1,12 @@
 package libmodsecurity
 
-//#include <modsecurity/modsecurity.h>
-//#include <modsecurity/transaction.h>
-//#include <modsecurity/rules.h>
-
+// #cgo CFLAGS: -I/usr/local/modsecurity/include
+// #cgo LDFLAGS: -L/usr/local/modsecurity/lib -lmodsecurity
+// #include <modsecurity/modsecurity.h>
+// #include <modsecurity/transaction.h>
+// #include <modsecurity/rules.h>
 import "C"
+
 import "fmt"
 
 type LibModSecurity struct {
@@ -12,16 +14,20 @@ type LibModSecurity struct {
 	rules  *C.Rules
 }
 
-func NewLibModSecurity() {
+func NewLibModSecurity() *LibModSecurity {
 	return &LibModSecurity{
-		rules: msc_init(),
-		rules: msc_create_rules_set(),
+		modsec: C.msc_init(),
+		rules:  C.msc_create_rules_set(),
 	}
 }
 
 func (l *LibModSecurity) AddRuleFromRemote(key, url string) error {
 	var errStrPoint *C.char
-	res := C.msc_rules_add_remote(l.rules, key, url, &errStrPoint)
+	cKey := C.CString(key)
+	cUrl := C.CString(url)
+	defer C.free(cKey)
+	defer C.free(cUrl)
+	res := C.msc_rules_add_remote(l.rules, cKey, cUrl, &errStrPoint)
 	if res < 0 {
 		errString := C.GoString(errStrPoint)
 		return fmt.Errorf("Failed to load the rules from %s - reason %s", url, errString)
@@ -31,7 +37,9 @@ func (l *LibModSecurity) AddRuleFromRemote(key, url string) error {
 
 func (l *LibModSecurity) AddRuleFromFile(rulefile string) error {
 	var errStrPoint *C.char
-	res := C.msc_rules_add_file(l.rules, rulefile, &errStrPoint)
+	cRulefile := C.CString(rulefile)
+	defer C.free(cRulefile)
+	res := C.msc_rules_add_file(l.rules, cRulefile, &errStrPoint)
 	if res < 0 {
 		errString := C.GoString(errStrPoint)
 		return fmt.Errorf("Failed to load the rules from %s - reason %s", rulefile, errString)
@@ -41,7 +49,9 @@ func (l *LibModSecurity) AddRuleFromFile(rulefile string) error {
 
 func (l *LibModSecurity) AddRule(rules string) error {
 	var errStrPoint *C.char
-	res := C.msc_rules_add(l.rules, rules, &errStrPoint)
+	cRules := C.CString(rules)
+	defer C.free(cRules)
+	res := C.msc_rules_add(l.rules, cRules, &errStrPoint)
 	if res < 0 {
 		errString := C.GoString(errStrPoint)
 		return fmt.Errorf("Failed to load the rule %s - reason %s", rules, errString)
