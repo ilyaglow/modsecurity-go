@@ -82,3 +82,18 @@ func (t *Transaction) AddRequestHeader(key, value string) {
 func (t *Transaction) ProcessRequestHeader() {
 	C.msc_process_request_headers(t.trans)
 }
+
+func (t *Transaction) RequestBodyFromFile(filename string) {
+	cFilename := C.CString(filename)
+	defer C.free(cFilename)
+	C.msc_request_body_from_file(t.trans, cFilename)
+}
+
+func (t *Transaction) AppendRequestBody(body []byte) {
+	uBody := (*C.uchar)(unsafe.Pointer(&body[0]))
+	C.msc_append_request_body(t.trans, uBody, C.size_t(len(body)))
+}
+
+func (t *Transaction) ProcessRequestBody() {
+	C.msc_process_request_body(t.trans)
+}
