@@ -78,3 +78,7 @@ func (t *Transaction) AddRequestHeader(key, value string) {
 
 	C.msc_add_n_request_header(t.trans, cUKey, C.strlen(cKey), cUVal, C.strlen(cVal))
 }
+
+func (t *Transaction) ProcessRequestHeader() {
+	C.msc_process_request_headers(t.trans)
+}
