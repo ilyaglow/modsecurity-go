@@ -1,9 +1,9 @@
 # ModSecurity-Go
-ModSecurity work with golang 
+ModSecurity middleware for go
 
 # Dependency
 
-*[LibModSecurity](https://github.com/SpiderLabs/ModSecurity/tree/libmodsecurity) 
+* [LibModSecurity](https://github.com/SpiderLabs/ModSecurity/tree/libmodsecurity) 
 
 # Install 
 
