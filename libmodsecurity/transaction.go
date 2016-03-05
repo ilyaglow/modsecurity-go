@@ -5,7 +5,13 @@ package libmodsecurity
 // #include <modsecurity/modsecurity.h>
 // #include <modsecurity/transaction.h>
 // #include <modsecurity/rules.h>
+// #include <string.h>
+// char * no_log_msg = "(no log message was specified)";
 import "C"
+import (
+	"fmt"
+	"unsafe"
+)
 
 type Transaction struct {
 	trans *C.Transaction
@@ -24,15 +30,15 @@ func (l *LibModSecurity) NewTransaction() *Transaction {
 }
 
 func (t *Transaction) Intervention() *Intervention {
-	var intervention C.Intervention
+	var intervention C.ModSecurityIntervention
 	intervention.status = 200
 	intervention.url = nil
 	if ret := C.msc_intervention(t.trans, &intervention); ret == 0 {
-		return 0
+		return nil
 	}
 
 	if intervention.log == nil {
-		intervention.log = "(no log message was specified)"
+		intervention.log = C.no_log_msg
 	}
 
 	return &Intervention{
@@ -50,4 +56,25 @@ func (t *Transaction) ProcessConnection(clientAddr, serverAddr string, clientPor
 	defer C.free(cClientAddr)
 	defer C.free(cServerAddr)
 	C.msc_process_connection(t.trans, cClientAddr, cClientPort, cServerAddr, cServerPort)
+}
+
+func (t *Transaction) ProcessURL(url, method string, major, minor int) {
+	cVersion := C.CString(fmt.Sprintf("%d.%d", major, minor))
+	cURL := C.CString(url)
+	cMethod := C.CString(method)
+	defer C.free(cVersion)
+	defer C.free(cURL)
+	defer C.free(cMethod)
+	C.msc_process_uri(t.trans, cURL, cMethod, cVersion)
+}
+
+func (t *Transaction) AddRequestHeader(key, value string) {
+	cKey := C.CString(key)
+	cVal := C.CString(value)
+	cUKey := (*C.uchar)(unsafe.Pointer(cKey))
+	cUVal := (*C.uchar)(unsafe.Pointer(cVal))
+	defer C.free(cKey)
+	defer C.free(cVal)
+
+	C.msc_add_n_request_header(t.trans, cUKey, C.strlen(cKey), cUVal, C.strlen(cVal))
 }
