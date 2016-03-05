@@ -97,3 +97,18 @@ func (t *Transaction) AppendRequestBody(body []byte) {
 func (t *Transaction) ProcessRequestBody() {
 	C.msc_process_request_body(t.trans)
 }
+
+func (t *Transaction) AddResponseHeader(key, value string) {
+	cKey := C.CString(key)
+	cVal := C.CString(value)
+	cUKey := (*C.uchar)(unsafe.Pointer(cKey))
+	cUVal := (*C.uchar)(unsafe.Pointer(cVal))
+	defer C.free(cKey)
+	defer C.free(cVal)
+
+	C.msc_add_n_response_header(t.trans, cUKey, C.strlen(cKey), cUVal, C.strlen(cVal))
+}
+
+func (t *Transaction) ProcessResponseHeader() {
+	C.msc_process_response_headers(t.trans)
+}
