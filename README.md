@@ -7,6 +7,4 @@ ModSecurity middleware for go
 
 # Install 
 
-```
-go get github.com/senghoo/modsecurity-go/modsecurity
-```
+[Install Guide](https://github.com/senghoo/modsecurity-go/blob/master/doc/install.md)
