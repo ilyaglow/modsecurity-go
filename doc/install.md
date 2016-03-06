@@ -42,5 +42,6 @@ PATH=/usr/local/bin:$PATH make && make install
 ```
 
 install modsecurity go middleware
-
+```
 go get github.com/senghoo/modsecurity-go/modsecurity
+```
