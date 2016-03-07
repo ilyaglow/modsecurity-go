@@ -33,7 +33,8 @@ func (t *Transaction) Intervention() *Intervention {
 	var intervention C.ModSecurityIntervention
 	intervention.status = 200
 	intervention.url = nil
-	if ret := C.msc_intervention(t.trans, &intervention); ret == 0 {
+	ret := C.msc_intervention(t.trans, &intervention)
+	if ret == 0 {
 		return nil
 	}
 
@@ -53,8 +54,8 @@ func (t *Transaction) ProcessConnection(clientAddr, serverAddr string, clientPor
 	cServerPort := C.int(serverPort)
 	cClientAddr := C.CString(clientAddr)
 	cServerAddr := C.CString(serverAddr)
-	defer C.free(cClientAddr)
-	defer C.free(cServerAddr)
+	defer C.free(unsafe.Pointer(cClientAddr))
+	defer C.free(unsafe.Pointer(cServerAddr))
 	C.msc_process_connection(t.trans, cClientAddr, cClientPort, cServerAddr, cServerPort)
 }
 
@@ -62,9 +63,9 @@ func (t *Transaction) ProcessURL(url, method string, major, minor int) {
 	cVersion := C.CString(fmt.Sprintf("%d.%d", major, minor))
 	cURL := C.CString(url)
 	cMethod := C.CString(method)
-	defer C.free(cVersion)
-	defer C.free(cURL)
-	defer C.free(cMethod)
+	defer C.free(unsafe.Pointer(cVersion))
+	defer C.free(unsafe.Pointer(cURL))
+	defer C.free(unsafe.Pointer(cMethod))
 	C.msc_process_uri(t.trans, cURL, cMethod, cVersion)
 }
 
@@ -73,8 +74,8 @@ func (t *Transaction) AddRequestHeader(key, value string) {
 	cVal := C.CString(value)
 	cUKey := (*C.uchar)(unsafe.Pointer(cKey))
 	cUVal := (*C.uchar)(unsafe.Pointer(cVal))
-	defer C.free(cKey)
-	defer C.free(cVal)
+	defer C.free(unsafe.Pointer(cKey))
+	defer C.free(unsafe.Pointer(cVal))
 
 	C.msc_add_n_request_header(t.trans, cUKey, C.strlen(cKey), cUVal, C.strlen(cVal))
 }
@@ -85,7 +86,7 @@ func (t *Transaction) ProcessRequestHeader() {
 
 func (t *Transaction) RequestBodyFromFile(filename string) {
 	cFilename := C.CString(filename)
-	defer C.free(cFilename)
+	defer C.free(unsafe.Pointer(cFilename))
 	C.msc_request_body_from_file(t.trans, cFilename)
 }
 
@@ -103,8 +104,8 @@ func (t *Transaction) AddResponseHeader(key, value string) {
 	cVal := C.CString(value)
 	cUKey := (*C.uchar)(unsafe.Pointer(cKey))
 	cUVal := (*C.uchar)(unsafe.Pointer(cVal))
-	defer C.free(cKey)
-	defer C.free(cVal)
+	defer C.free(unsafe.Pointer(cKey))
+	defer C.free(unsafe.Pointer(cVal))
 
 	C.msc_add_n_response_header(t.trans, cUKey, C.strlen(cKey), cUVal, C.strlen(cVal))
 }
