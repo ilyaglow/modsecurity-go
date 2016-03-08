@@ -91,8 +91,13 @@ func (t *Transaction) RequestBodyFromFile(filename string) {
 }
 
 func (t *Transaction) AppendRequestBody(body []byte) {
-	uBody := (*C.uchar)(unsafe.Pointer(&body[0]))
-	C.msc_append_request_body(t.trans, uBody, C.size_t(len(body)))
+	bodyLen := len(body)
+	if bodyLen > 0 {
+		uBody := (*C.uchar)(unsafe.Pointer(&body[0]))
+		C.msc_append_request_body(t.trans, uBody, C.size_t(bodyLen))
+	} else {
+		C.msc_append_request_body(t.trans, nil, 0)
+	}
 }
 
 func (t *Transaction) ProcessRequestBody() {
@@ -115,8 +120,13 @@ func (t *Transaction) ProcessResponseHeader() {
 }
 
 func (t *Transaction) AppendResponseBody(body []byte) {
-	uBody := (*C.uchar)(unsafe.Pointer(&body[0]))
-	C.msc_append_response_body(t.trans, uBody, C.size_t(len(body)))
+	bodyLen := len(body)
+	if bodyLen > 0 {
+		uBody := (*C.uchar)(unsafe.Pointer(&body[0]))
+		C.msc_append_response_body(t.trans, uBody, C.size_t(bodyLen))
+	} else {
+		C.msc_append_response_body(t.trans, nil, 0)
+	}
 }
 
 func (t *Transaction) ProcessResponseBody() {
