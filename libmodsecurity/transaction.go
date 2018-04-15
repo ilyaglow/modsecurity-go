@@ -115,8 +115,12 @@ func (t *Transaction) AddResponseHeader(key, value string) {
 	C.msc_add_n_response_header(t.trans, cUKey, C.strlen(cKey), cUVal, C.strlen(cVal))
 }
 
-func (t *Transaction) ProcessResponseHeader() {
-	C.msc_process_response_headers(t.trans)
+func (t *Transaction) ProcessResponseHeader(code int, protocol string) {
+	cCode := C.int(code)
+	cProtocol := C.CString(protocol)
+	defer C.free(unsafe.Pointer(cProtocol))
+
+	C.msc_process_response_headers(t.trans, cCode, cProtocol)
 }
 
 func (t *Transaction) AppendResponseBody(body []byte) {

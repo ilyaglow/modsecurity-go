@@ -89,7 +89,7 @@ func (m *connection) checkResponseHeader() (ok bool) {
 		}
 	}
 
-	m.trans.ProcessResponseHeader()
+	m.trans.ProcessResponseHeader(200, "http")
 	m.intervention = m.trans.Intervention()
 	if m.intervention != nil {
 		return true
