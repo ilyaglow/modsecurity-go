@@ -8,6 +8,7 @@ import (
 var libmodsecurity *LibModSecurity
 
 func TestVar(t *testing.T) {
+	libmodsecurity.AddRule("SecRuleEngine On")
 	err := libmodsecurity.AddRule("SecRule REQUEST_LINE \"@contains php\" \"id:1,phase:1,deny\"")
 	if err != nil {
 		t.Fatal("cant add rule ", err)
